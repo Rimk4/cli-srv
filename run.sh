@@ -14,11 +14,13 @@ APP1="${BUILD}/app1_cli/app1_cli"
 
 mkdir -p "${PID_DIR}"
 
+# Сборка проекта через CMake в каталог BUILD.
 build() {
     cmake -S "${ROOT}" -B "${BUILD}" -DCMAKE_BUILD_TYPE=Release
     cmake --build "${BUILD}" -j"$(nproc 2>/dev/null || echo 4)"
 }
 
+# Проверка: PID из файла $1 ещё жив (kill -0). Файл должен существовать.
 is_running() {
     local f="$1"
     [[ -f "$f" ]] || return 1
@@ -27,6 +29,7 @@ is_running() {
     [[ -n "${pid}" ]] && kill -0 "${pid}" 2>/dev/null
 }
 
+# Остановить процесс по PID из файла $1; $2 — имя для сообщений. Сначала SIGTERM, затем SIGKILL; файл удалить.
 stop_one() {
     local f="$1"
     local name="$2"
@@ -50,6 +53,7 @@ stop_one() {
     rm -f "$f"
 }
 
+# Собрать проект и запустить только сервер в фоне; PID записать в SERVER_PID_FILE.
 cmd_start() {
     build
     if is_running "${SERVER_PID_FILE}"; then
@@ -62,6 +66,7 @@ cmd_start() {
     echo "Server started, PID $(cat "${SERVER_PID_FILE}") (socket ${SOCKET_PATH})."
 }
 
+# Остановить сервер по PID-файлу, убить клиентов app1_cli из этого build/, удалить сокет.
 cmd_stop() {
     stop_one "${SERVER_PID_FILE}" "app2_server"
     pkill -f "${APP1}" 2>/dev/null || true
@@ -70,6 +75,8 @@ cmd_stop() {
     echo "Stopped."
 }
 
+# Интерактивный режим: прибрать старый сервер, собрать, сервер в фоне + CLI на переднем плане;
+# по выходу из CLI или сигналу — cleanup_session (убрать сервер и сокет).
 cmd_run() {
     pkill -f "${BUILD}/app2_server/app2_server" 2>/dev/null || true
     rm -f "${SOCKET_PATH}"
@@ -82,6 +89,7 @@ cmd_run() {
     "${APP1}" "${SOCKET_PATH}"
 }
 
+# Завершить процесс сервера с PID $1 (SIGTERM → SIGKILL), подождать завершения, удалить узел сокета.
 cleanup_session() {
     local pid="${1:-}"
     if [[ -n "${pid}" ]] && kill -0 "${pid}" 2>/dev/null; then
@@ -99,6 +107,7 @@ cleanup_session() {
     rm -f "${SOCKET_PATH}"
 }
 
+# Краткая справка по командам в stdout.
 usage() {
     cat <<EOF
 Usage: $(basename "$0") [command]
@@ -114,6 +123,7 @@ Commands:
 EOF
 }
 
+# Первый аргумент — подкоманда; по умолчанию run.
 case "${1:-run}" in
     run) cmd_run ;;
     build)  build ;;
