@@ -4,8 +4,8 @@
 
 ## Требования
 
-- Linux с **Unix domain sockets** (`AF_UNIX`; типичный десктоп или встраиваемый дистрибутив на glibc/musl)
-- GCC или Clang с поддержкой **C++17**
+- Linux с **Unix domain sockets** (`AF_UNIX`)
+- GCC или Clang с **C++17**
 - CMake **3.25+**
 
 ## Структура
