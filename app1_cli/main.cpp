@@ -34,7 +34,8 @@ public:
 
 /**
  * @brief Проверка доступности сервера
- *
+ * @param [in] socketPath путь к сокету сервера.
+`*
  * @return true если сервер доступен, иначе false.
  */
  bool probeServer(const char* socketPath)
