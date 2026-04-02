@@ -1,3 +1,8 @@
+/**
+ * @file logger.cpp
+ * @brief Реализация Logger: временные метки через `localtime_r` (reentrant), flush на каждую запись.
+ */
+
 #include "logger.h"
 
 #include <chrono>

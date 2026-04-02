@@ -1,3 +1,8 @@
+/**
+ * @file app2_server/main.cpp
+ * @brief Многопоточный сервер AF_UNIX: accept в главном потоке, обработка клиента в `std::thread`.
+ */
+
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -10,16 +15,27 @@
 #include <unistd.h>
 #include "logger.h"
 
+/** Управляется обработчиками сигналов; читается в цикле accept. */
 static volatile sig_atomic_t running = 1;
 
+/** Минимальный обработчик: только устанавливает флаг. */
 void signal_handler(int) {
     running = 0;
 }
 
+/** @brief Симметричная операция разворота строки. */
 std::string reverse(const std::string& str) {
     return {str.rbegin(), str.rend()};
 }
 
+/**
+ * @brief Обрабатывает одно принятое соединение: read → reverse → Logger → write → close.
+ *
+ * @param client_fd дескриптор после `accept(2)`; всегда закрывается в этой функции (включая ранние выходы).
+ * @param logger    общий журнал; вызовы `log` сериализуются внутри Logger.
+ *
+ * @note Выполняется в потоке worker.
+ */
 void handle_client(int client_fd, Logger& logger) {
     char buffer[1024];
     
@@ -47,6 +63,11 @@ void handle_client(int client_fd, Logger& logger) {
     close(client_fd);
 }
 
+/**
+ * @brief Инициализация сигналов, сокета, цикл accept, ожидание потоков, очистка узла сокета.
+ *
+ * @param argc при `argc > 1` — путь сокета; при `argc > 2` — путь файла журнала.
+ */
 int main(int argc, char* argv[]) {
     const char* SOCKET_PATH = "/tmp/ipc.sock";
     const char* LOG_PATH = "server.log";

@@ -1,3 +1,8 @@
+/**
+ * @file app1_cli/main.cpp
+ * @brief Интерактивный клиент: строковый запрос по AF_UNIX `SOCK_STREAM`, ответ сервера в stdout.
+ */
+
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -6,13 +11,27 @@
 #include <unistd.h>
 #include <signal.h>
 
+/**
+ * @brief RAII-обёртка над дескриптором сокета (fcntl-совместимый fd).
+ */
 class SocketGuard {
     int fd;
 public:
+    /** @param f дескриптор для владения; при `f >= 0` будет закрыт в деструкторе. */
     explicit SocketGuard(int f = -1) : fd(f) {}
+    /** @brief Вызывает `close(2)` для захваченного fd, если он не отрицательный. */
     ~SocketGuard() { if (fd >= 0) close(fd); }
 };
 
+/**
+ * @brief Одна транзакция «отправить полезную нагрузку — получить ответ».
+ *
+ * @param socket_path путь узла `AF_UNIX` (существующий сокет сервера).
+ * @param input       данные для `write(2)`; размер произвольный, без завершающего `\0` на проводе.
+ * @param[out] out_response ответ, прочитанный одним `read` до 1023 байт, трактуется как C-строка.
+ *
+ * @return `true` при успешном обмене, иначе `false` (в stderr — краткая диагностика).
+ */
 bool send_and_receive(const char* socket_path, const std::string& input, std::string& out_response) {
     int sock = socket(AF_UNIX, SOCK_STREAM, 0);
     if (sock < 0) return false;
@@ -43,6 +62,11 @@ bool send_and_receive(const char* socket_path, const std::string& input, std::st
     return true;
 }
 
+/**
+ * @brief Точка входа: цикл `getline`, для каждой непустой строки — запрос к серверу.
+ *
+ * @param argc количество аргументов; при `argc > 1` `argv[1]` — путь сокета, иначе `/tmp/ipc.sock`.
+ */
 int main(int argc, char* argv[]) {
     const char* socket_path = (argc > 1) ? argv[1] : "/tmp/ipc.sock";
     signal(SIGPIPE, SIG_IGN);

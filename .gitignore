@@ -1,4 +1,6 @@
 build/
+doc/html/
+doc/latex/
 *.log
 .cache/
 .vscode/
