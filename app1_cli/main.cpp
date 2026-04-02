@@ -12,7 +12,7 @@
 #include <unistd.h>
 
 /**
- * @brief RAII-обёртка над дескриптором сокета (fcntl-совместимый fd).
+ * @brief RAII-обёртка над дескриптором сокета.
  */
 class SocketGuard
 {
