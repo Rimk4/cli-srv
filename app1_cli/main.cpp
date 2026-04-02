@@ -40,10 +40,13 @@ public:
  bool probeServer(const char* socketPath)
  {
      // Проверяем, существует ли файл сокета
-     if (access(socketPath, F_OK) != 0) {
+     if (access(socketPath, F_OK) != 0)
+     {
          std::cerr << "Error: Server socket not found at " << socketPath << "\n";
+         
          return false;
      }
+
      return true;
  }
 
