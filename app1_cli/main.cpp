@@ -30,6 +30,21 @@ public:
 };
 
 /**
+ * @brief Проверка доступности сервера
+ *
+ * @return true если сервер доступен, иначе false.
+ */
+ bool probeServer(const char* socketPath)
+ {
+     // Проверяем, существует ли файл сокета
+     if (access(socketPath, F_OK) != 0) {
+         std::cerr << "Error: Server socket not found at " << socketPath << "\n";
+         return false;
+     }
+     return true;
+ }
+
+/**
  * @brief Одна транзакция: отправить полезную нагрузку — получить ответ.
  *
  * @param [in] socketPath путь узла AF_UNIX (существующий сокет сервера).
@@ -94,6 +109,9 @@ int main(int argc, char* argv[])
     // Узел сокета сервера: явный путь или сокет по умолчанию.
     const char* socketPath = (argc > 1) ? argv[1] : "/tmp/ipc.sock";
     signal(SIGPIPE, SIG_IGN);
+
+    if (!probeServer(socketPath))
+        return 1;
 
     // Очередная строка из stdin.
     std::string input;
