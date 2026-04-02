@@ -69,7 +69,7 @@ cmd_start() {
 # Остановить сервер по PID-файлу, убить клиентов app1_cli из этого build/, удалить сокет.
 cmd_stop() {
     stop_one "${SERVER_PID_FILE}" "app2_server"
-    pkill -f "${APP1}" 2>/dev/null || true
+    pkill -f "build/app1_cli/app1_cli" 2>/dev/null || true
     rm -f "${PID_DIR}/app1_cli.pid"
     rm -f "${SOCKET_PATH}"
     echo "Stopped."
@@ -117,7 +117,7 @@ Commands:
   run     — то же, что без аргумента
   build   — только CMake + сборка
   start   — собрать и держать сервер в фоне (PID в ${SERVER_PID_FILE})
-  stop    — остановить сервер (PID-файл), завершить app1_cli этой сборки (pkill -f), убрать сокет
+  stop    — остановить сервер (PID-файл), завершить app1_cli этой сборки (build/...), убрать сокет
 
 Переменная окружения: SOCKET_PATH (по умолчанию ${SOCKET_PATH})
 EOF
