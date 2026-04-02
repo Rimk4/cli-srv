@@ -10,14 +10,15 @@
 #include <string>
 
 /**
- * @brief Журнал на базе `std::ofstream` с сериализацией вызовов через `std::mutex`.
+ * @brief Журнал на базе std::ofstream с сериализацией вызовов через std::mutex.
  */
-class Logger {
+class Logger
+{
 public:
     /**
-     * @param filename путь к файлу журнала; открывается в режиме append.
+     * @param fileName путь к файлу журнала; открывается в режиме append.
      */
-    explicit Logger(const std::string& filename);
+    explicit Logger(const std::string& fileName);
     ~Logger();
 
     Logger(const Logger&) = delete;
@@ -32,11 +33,11 @@ public:
     void log(const std::string& original, long long microseconds);
 
 private:
-    std::ofstream m_file;
-    std::mutex m_mutex;
+    std::ofstream mFile;
+    std::mutex mMutex;
 
     /**
-     * @return локальная отметка времени `YYYY-MM-DD HH:MM:SS.mmm` или `invalid-time` при ошибке `localtime_r`.
+     * @return локальная отметка времени YYYY-MM-DD HH:MM:SS.mmm или invalid-time при ошибке localtime_r.
      */
     std::string getCurrentTimestamp() const;
 };

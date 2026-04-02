@@ -19,9 +19,9 @@ class SocketGuard
     int fd;
 public:
     /**
-    * @param f дескриптор для владения; при f >= 0 будет закрыт в деструкторе.
+    * @param ownedFd дескриптор для владения; при ownedFd >= 0 будет закрыт в деструкторе.
     */
-    explicit SocketGuard(int f = -1) : fd(f) {}
+    explicit SocketGuard(int ownedFd = -1) : fd(ownedFd) {}
 
     /**
     * @brief Вызывает close для захваченного fd, если он не отрицательный.
@@ -32,13 +32,13 @@ public:
 /**
  * @brief Одна транзакция: отправить полезную нагрузку — получить ответ.
  *
- * @param [in] socket_path путь узла AF_UNIX (существующий сокет сервера).
+ * @param [in] socketPath путь узла AF_UNIX (существующий сокет сервера).
  * @param [in] input       данные для write; размер произвольный, без завершающего \0.
- * @param [out] out_response ответ, прочитанный одним read до 1023 байт, C-строка.
+ * @param [out] outResponse ответ, прочитанный одним read до 1023 байт, C-строка.
  *
  * @return true при успешном обмене, иначе false (в stderr — краткая диагностика).
  */
-bool send_and_receive(const char* socket_path, const std::string& input, std::string& out_response)
+bool sendAndReceive(const char* socketPath, const std::string& input, std::string& outResponse)
 {
     // Клиентский потоковый сокет (еще не привязан к пути сервера).
     int sock = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -52,7 +52,7 @@ bool send_and_receive(const char* socket_path, const std::string& input, std::st
     // Адрес семейства AF_UNIX: sun_path должен совпадать с сокетом сервера.
     struct sockaddr_un addr{};
     addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, socket_path, sizeof(addr.sun_path) - 1);
+    strncpy(addr.sun_path, socketPath, sizeof(addr.sun_path) - 1);
 
     // Нет слушающего сокета по указанному пути или отказ в подключении.
     if (connect(sock, (struct sockaddr*)&addr, sizeof(addr)) < 0)
@@ -70,16 +70,16 @@ bool send_and_receive(const char* socket_path, const std::string& input, std::st
 
     // Сырые байты ответа; в конеце нужно дописать '\0'.
     char buffer[1024];
-    ssize_t n = read(sock, buffer, sizeof(buffer) - 1);  // Прочитано n байт
+    ssize_t numRead = read(sock, buffer, sizeof(buffer) - 1);
     // Ошибка read.
-    if (n < 0)
+    if (numRead < 0)
     {
         std::cerr << "Error: Failed to read\n";
         return false;
     }
 
-    buffer[n] = '\0';
-    out_response = buffer;
+    buffer[numRead] = '\0';
+    outResponse = buffer;
 
     return true;
 }
@@ -92,7 +92,7 @@ bool send_and_receive(const char* socket_path, const std::string& input, std::st
 int main(int argc, char* argv[])
 {
     // Узел сокета сервера: явный путь или сокет по умолчанию.
-    const char* socket_path = (argc > 1) ? argv[1] : "/tmp/ipc.sock";
+    const char* socketPath = (argc > 1) ? argv[1] : "/tmp/ipc.sock";
     signal(SIGPIPE, SIG_IGN);
 
     // Очередная строка из stdin.
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
         
         // Тело ответа сервера после одной транзакции send/recv.
         std::string response;
-        if (!send_and_receive(socket_path, input, response))
+        if (!sendAndReceive(socketPath, input, response))
             return 1;
 
         std::cout << "Reversed: " << response << '\n';
