@@ -79,7 +79,7 @@ bool sendAndReceive(const char* socketPath, const std::string& input, std::strin
     }
 
     buffer[numRead] = '\0';
-    outResponse = buffer;
+    outResponse.assign(buffer, static_cast<size_t>(numRead));
 
     return true;
 }
