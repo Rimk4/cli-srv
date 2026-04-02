@@ -16,7 +16,7 @@ class Logger
 {
 public:
     /**
-     * @param fileName путь к файлу журнала; открывается в режиме append.
+     * @param [in] fileName путь к файлу журнала; открывается в режиме append.
      */
     explicit Logger(const std::string& fileName);
     ~Logger();
@@ -27,8 +27,8 @@ public:
     /**
      * @brief Дописывает строку: локальная метка времени, исходная строка (усечённая), длительность.
      *
-     * @param original       полезная нагрузка запроса; при длине свыше 1024 символов усекается с суффиксом «...».
-     * @param microseconds   длительность обработки (здесь — вокруг чистого «reverse»), для метрик.
+     * @param [in] original       полезная нагрузка запроса; при длине свыше 1024 символов усекается с суффиксом «...».
+     * @param [in] microseconds   длительность обработки (здесь — вокруг чистого «reverse»), для метрик.
      */
     void log(const std::string& original, long long microseconds);
 

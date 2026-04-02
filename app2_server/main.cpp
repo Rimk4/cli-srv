@@ -28,6 +28,7 @@ void signalHandler(int)
 
 /**
  * @brief Симметричная операция разворота строки.
+ * @param text Текст, который нужно развернуть
  * @return Развёрнутая строка
  */
 std::string reverse(const std::string& text)
@@ -38,8 +39,8 @@ std::string reverse(const std::string& text)
 /**
  * @brief Обрабатывает одно принятое соединение: read → reverse → Logger → write → close.
  *
- * @param clientFd дескриптор после accept; закрывается в этой функции.
- * @param logger    общий журнал; вызовы log сериализуются внутри Logger.
+ * @param [in] clientFd дескриптор после accept; закрывается в этой функции.
+ * @param [in] logger    общий журнал; вызовы log сериализуются внутри Logger.
  *
  * @note Выполняется в потоке worker.
  */

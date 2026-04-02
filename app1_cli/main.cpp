@@ -22,7 +22,7 @@ class SocketGuard
     int fd;
 public:
     /**
-    * @param ownedFd дескриптор для владения; при ownedFd >= 0 будет закрыт в деструкторе.
+    * @param [in] ownedFd дескриптор для владения; при ownedFd >= 0 будет закрыт в деструкторе.
     */
     explicit SocketGuard(int ownedFd = -1) : fd(ownedFd) {}
 
@@ -117,6 +117,7 @@ int main(int argc, char* argv[])
     const char* socketPath = (argc > 1) ? argv[1] : "/tmp/ipc.sock";
     signal(SIGPIPE, SIG_IGN);
 
+    // Проверка доступности сервера
     if (!probeServer(socketPath))
         return 1;
 
